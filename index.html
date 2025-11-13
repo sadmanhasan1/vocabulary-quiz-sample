@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Gamified Vocabulary Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div id="app" class="min-h-screen p-4 md:p-8">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-6 fade-in border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h1 class="text-3xl font-bold text-slate-800">GRE Vocabulary Quiz</h1>
+                    <div class="text-right">
+                        <div class="text-sm text-slate-500 font-medium">Study Session</div>
+                        <div class="text-2xl font-semibold text-blue-600" id="timer">00:00</div>
+                    </div>
+                </div>
+                <p class="text-slate-600">Test your knowledge of advanced vocabulary</p>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-6 fade-in border border-slate-200">
+                <!-- Progress Stats -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="text-center p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-3xl font-bold text-slate-800" id="current-question">1</div>
+                        <div class="text-sm text-slate-600 mt-1">Current Question</div>
+                    </div>
+                    <div class="text-center p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <div class="text-3xl font-bold text-emerald-600" id="correct-count">0</div>
+                        <div class="text-sm text-slate-600 mt-1">Correct</div>
+                    </div>
+                    <div class="text-center p-4 bg-amber-50 rounded-lg border border-amber-200">
+                        <div class="text-3xl font-bold text-amber-600" id="incorrect-count">0</div>
+                        <div class="text-sm text-slate-600 mt-1">Incorrect</div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex justify-between text-sm text-slate-600 mb-2 font-medium">
+                        <span>Progress</span>
+                        <span>Question <span id="current-num">1</span> of <span id="total-questions">10</span></span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                        <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500" style="width: 10%"></div>
+                    </div>
+                </div>
+
+                <!-- Quiz Question -->
+                <div id="quiz-area" class="mb-6">
+                    <div class="bg-gradient-to-br from-slate-50 to-white rounded-xl p-8 border-2 border-slate-300 mb-6">
+                        <div class="mb-4">
+                            <span class="inline-block px-4 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold mb-4">DEFINITION</span>
+                        </div>
+                        <p id="question-text" class="text-2xl font-semibold text-slate-800 mb-2"></p>
+                        <p class="text-slate-600 text-sm">Select the word that matches this definition:</p>
+                    </div>
+
+                    <!-- Answer Options -->
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="feedback" class="hidden mb-6 p-4 rounded-lg"></div>
+
+                <!-- Next Button -->
+                <button id="next-btn" class="hidden w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-semibold text-lg shadow-md">
+                    Next Question →
+                </button>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8 border border-slate-200">
+                <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                    </svg>
+                    Quiz Statistics
+                </h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <p class="text-2xl font-bold text-slate-800" id="stat-total">10</p>
+                        <p class="text-sm text-slate-600 mt-1">Total Questions</p>
+                    </div>
+                    <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <p class="text-2xl font-bold text-emerald-600" id="stat-correct">0</p>
+                        <p class="text-sm text-slate-600 mt-1">Correct</p>
+                    </div>
+                    <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                        <p class="text-2xl font-bold text-amber-600" id="stat-incorrect">0</p>
+                        <p class="text-sm text-slate-600 mt-1">Incorrect</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p class="text-2xl font-bold text-blue-600" id="stat-accuracy">0%</p>
+                        <p class="text-sm text-slate-600 mt-1">Accuracy</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                word: "Obsequious",
+                definition: "Obedient or attentive to an excessive or servile degree",
+                options: ["Obsequious", "Perfidious", "Truculent", "Laconic"]
+            },
+            {
+                word: "Perfidious",
+                definition: "Deceitful and untrustworthy",
+                options: ["Insipid", "Perfidious", "Obsequious", "Eloquent"]
+            },
+            {
+                word: "Truculent",
+                definition: "Eager or quick to argue or fight; aggressively defiant",
+                options: ["Pragmatic", "Laconic", "Truculent", "Ambiguous"]
+            },
+            {
+                word: "Insipid",
+                definition: "Lacking flavor, vigor, or interest; dull",
+                options: ["Resilient", "Insipid", "Meticulous", "Perfidious"]
+            },
+            {
+                word: "Laconic",
+                definition: "Using very few words; brief and concise",
+                options: ["Verbose", "Obsequious", "Laconic", "Eloquent"]
+            },
+            {
+                word: "Eloquent",
+                definition: "Fluent or persuasive in speaking or writing",
+                options: ["Eloquent", "Truculent", "Candid", "Insipid"]
+            },
+            {
+                word: "Pragmatic",
+                definition: "Dealing with things sensibly and realistically",
+                options: ["Ambiguous", "Pragmatic", "Verbose", "Resilient"]
+            },
+            {
+                word: "Ambiguous",
+                definition: "Open to more than one interpretation; unclear",
+                options: ["Meticulous", "Laconic", "Ambiguous", "Perfidious"]
+            },
+            {
+                word: "Resilient",
+                definition: "Able to withstand or recover quickly from difficulties",
+                options: ["Resilient", "Obsequious", "Insipid", "Candid"]
+            },
+            {
+                word: "Meticulous",
+                definition: "Showing great attention to detail; very careful",
+                options: ["Pragmatic", "Eloquent", "Meticulous", "Truculent"]
+            }
+        ];
+
+        let currentIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let answered = false;
+        let startTime = Date.now();
+        let timerInterval;
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function displayQuestion() {
+            answered = false;
+            const question = questions[currentIndex];
+            
+            document.getElementById('question-text').textContent = question.definition;
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            
+            const shuffledOptions = shuffleArray(question.options);
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = shuffledOptions.map(option => `
+                <button class="option-btn w-full text-left p-4 bg-white border-2 border-slate-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700" data-answer="${option}">
+                    ${option}
+                </button>
+            `).join('');
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleAnswer(btn));
+            });
+            
+            updateUI();
+        }
+
+        function handleAnswer(button) {
+            if (answered) return;
+            answered = true;
+            
+            const selectedAnswer = button.dataset.answer;
+            const correctAnswer = questions[currentIndex].word;
+            const isCorrect = selectedAnswer === correctAnswer;
+            
+            if (isCorrect) {
+                correctCount++;
+                button.classList.remove('border-slate-300', 'bg-white');
+                button.classList.add('border-emerald-500', 'bg-emerald-100');
+                showFeedback('Correct! Well done.', 'success');
+            } else {
+                incorrectCount++;
+                button.classList.remove('border-slate-300', 'bg-white');
+                button.classList.add('border-red-500', 'bg-red-100');
+                
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    if (btn.dataset.answer === correctAnswer) {
+                        btn.classList.add('border-emerald-500', 'bg-emerald-100');
+                    }
+                });
+                
+                showFeedback(`Incorrect. The correct answer is "${correctAnswer}".`, 'error');
+            }
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed');
+            });
+            
+            if (currentIndex < questions.length - 1) {
+                document.getElementById('next-btn').classList.remove('hidden');
+            } else {
+                setTimeout(showResults, 1500);
+            }
+            
+            updateUI();
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            
+            if (type === 'success') {
+                feedback.className = 'mb-6 p-4 rounded-lg bg-emerald-100 border-2 border-emerald-400 text-emerald-800 font-medium';
+            } else {
+                feedback.className = 'mb-6 p-4 rounded-lg bg-red-100 border-2 border-red-400 text-red-800 font-medium';
+            }
+            
+            feedback.textContent = message;
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            displayQuestion();
+        }
+
+        function showResults() {
+            const accuracy = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('quiz-area').innerHTML = `
+                <div class="text-center p-8 bg-gradient-to-br from-blue-50 to-slate-50 rounded-xl border-2 border-blue-300">
+                    <div class="text-6xl mb-4">🎓</div>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-4">Quiz Complete!</h2>
+                    <div class="text-xl text-slate-600 mb-6">
+                        <p>You got <span class="font-bold text-emerald-600">${correctCount}</span> out of <span class="font-bold">${questions.length}</span> correct</p>
+                        <p class="text-2xl font-bold text-blue-600 mt-2">${accuracy}% Accuracy</p>
+                    </div>
+                    <p class="text-slate-600">Great job completing the vocabulary quiz!</p>
+                </div>
+            `;
+        }
+
+        function updateUI() {
+            document.getElementById('current-question').textContent = currentIndex + 1;
+            document.getElementById('current-num').textContent = currentIndex + 1;
+            document.getElementById('total-questions').textContent = questions.length;
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('incorrect-count').textContent = incorrectCount;
+            
+            const progressPercent = Math.round(((currentIndex + 1) / questions.length) * 100);
+            document.getElementById('progress-bar').style.width = progressPercent + '%';
+            
+            const accuracy = correctCount + incorrectCount > 0 
+                ? Math.round((correctCount / (correctCount + incorrectCount)) * 100) 
+                : 0;
+            
+            document.getElementById('stat-total').textContent = questions.length;
+            document.getElementById('stat-correct').textContent = correctCount;
+            document.getElementById('stat-incorrect').textContent = incorrectCount;
+            document.getElementById('stat-accuracy').textContent = accuracy + '%';
+        }
+
+        document.getElementById('next-btn').addEventListener('click', nextQuestion);
+
+        startTimer();
+        displayQuestion();
+    </script>
+</body>
+</html>
